@@ -1,3 +1,6 @@
 data/
 
+# Make builds build.sql so it shouldn't be in scc
+build.sql 
+
 .DS_Store
