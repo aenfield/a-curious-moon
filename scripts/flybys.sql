@@ -26,7 +26,7 @@ INTO flybys
 FROM nadirs
 ORDER BY nadir;
 
--- add primary key (why not do it when creating the table?)
+-- add primary key (why not do it when creating the table? maybe because we're using INTO?)
 ALTER TABLE flybys ADD COLUMN id SERIAL PRIMARY KEY;
 
 -- using the key, create the name using the new ID

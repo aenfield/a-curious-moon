@@ -93,3 +93,22 @@ CREATE TABLE import.inms(
 	c1counts text,
 	c2counts text
 );
+
+DROP TABLE IF EXISTS import.cda;
+CREATE TABLE import.cda (
+    event_id TEXT,
+    impact_event_time TEXT,
+    impact_event_julian_date TEXT,
+    qp_amplitude TEXT,
+    qi_amplitude TEXT,
+    qt_amplitude TEXT,
+    qc_amplitude TEXT,
+    spacecraft_sun_distance TEXT,
+    spacecraft_saturn_distance TEXT,
+    spacecraft_x_velocity TEXT,
+    spacecraft_y_velocity TEXT,
+    spacecraft_z_velocity TEXT,
+    counter_number TEXT,
+    particle_mass TEXT,
+    particle_charge TEXT
+);

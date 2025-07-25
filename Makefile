@@ -3,8 +3,10 @@ BUILD=${CURDIR}/build.sql
 SCRIPTS=${CURDIR}/scripts
 CSV_MP=${CURDIR}/data/master_plan.csv
 CSV_INMS=${CURDIR}/data/INMS/inms.csv
+CSV_CDA=${CURDIR}/data/CDA/cda.csv
 MASTER=$(SCRIPTS)/import.sql
 FLYBYS=$(SCRIPTS)/flybys.sql
+CDA=$(SCRIPTS)/cda.sql
 NORMALIZE=$(SCRIPTS)/normalize.sql
 FUNCTIONS=$(SCRIPTS)/functions.sql
 VIEWS=$(SCRIPTS)/views.sql
@@ -22,6 +24,7 @@ import: master
 	@echo "COPY import.inms FROM '$(CSV_INMS)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 	@echo "-- delete empty rows (null) and header rows (field name is same as value)" >> $(BUILD)
 	@echo "DELETE FROM import.inms WHERE sclk IS NULL OR sclk = 'sclk'; " >> $(BUILD)
+	@echo "COPY import.cda FROM '$(CSV_CDA)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 
 normalize: import
 	@cat $(NORMALIZE) >> $(BUILD)
@@ -32,8 +35,11 @@ views: normalize
 functions: views
 	@cat $(FUNCTIONS) >> $(BUILD)
 
+cda: functions
+	@cat $(CDA) >> $(BUILD)
+
 # order after functions are created, since this uses a function
-flybys: clean functions
+flybys: clean cda
 	@cat $(FLYBYS) >> $(BUILD)
 
 clean:
