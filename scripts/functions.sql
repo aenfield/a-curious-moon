@@ -12,3 +12,16 @@ CREATE FUNCTION low_time (
         AND flyby_altitudes.year = yr
         AND flyby_altitudes.week = wk
 $$ language sql;
+
+DROP FUNCTION IF EXISTS pythag(NUMERIC, NUMERIC, NUMERIC);
+CREATE FUNCTION pythag(
+    x NUMERIC,
+    y NUMERIC,
+    z NUMERIC,
+    out NUMERIC
+) AS $$
+SELECT
+    SQRT(
+        (x ^ 2) + (y ^ 2) + (z ^ 2)
+    )::numeric(10,2);
+$$ language sql;
