@@ -14,7 +14,8 @@ master:
 import: master
 	@echo "COPY import.master_plan FROM '$(CSV)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 
-normalize: import
+# rebuilds full build.sql, starting from scratch so we don't add multiple instances of the same code if we run make multiple times
+normalize: clean import
 	@cat $(NORMALIZE) >> $(BUILD)
 
 clean:
