@@ -14,7 +14,7 @@ CREATE TABLE import.master_plan(
     description TEXT
 );
 
-DROP TABLE IF EXISTS import.inms;
+DROP TABLE IF EXISTS import.inms CASCADE;
 CREATE TABLE import.inms(
     sclk TEXT,
     uttime TEXT,
@@ -93,11 +93,3 @@ CREATE TABLE import.inms(
 	c1counts text,
 	c2counts text
 );
-
-COPY import.inms FROM '$(CSV_INMS)' WITH DELIMITER ',' HEADER CSV;
-
--- delete empty rows (null) and header rows (field name is same as value)
-DELETE FROM 
-    import.inms
-WHERE sclk IS NULL 
-    OR sclk = 'sclk'; 

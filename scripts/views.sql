@@ -14,7 +14,7 @@ SELECT
 FROM events
 INNER JOIN event_types
     ON event_types.id = event_type_id
-WHERE target_id = 28 
+WHERE event_types.description = 'Enceladus'
 ORDER BY events.time_stamp;
 
 CREATE INDEX idx_event_search ON enceladus_events using GIN(search);
@@ -24,6 +24,8 @@ DROP MATERIALIZED VIEW IF EXISTS flyby_altitudes;
 CREATE MATERIALIZED VIEW flyby_altitudes AS
 SELECT
     (sclk::timestamp) AS time_stamp,
+    DATE_PART('year', sclk::timestamp) AS year,
+    DATE_PART('week', sclk::timestamp) AS week,
     alt_t::numeric(10, 3) AS altitude
 FROM import.inms
 WHERE target='ENCELADUS'
