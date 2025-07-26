@@ -13,10 +13,11 @@ NORMALIZE=$(SCRIPTS)/normalize.sql
 FUNCTIONS=$(SCRIPTS)/functions.sql
 VIEWS=$(SCRIPTS)/views.sql
 INMSREADINGS=$(SCRIPTS)/inmsreadings.sql
+ISTHERELIFE=$(SCRIPTS)/istherelife.sql
 
 # built up using stuff in the book - the result feels spaghettified and isn't maintainable
 
-all: inmsreadings
+all: istherelife
 	psql $(DB) -f ${BUILD}
 
 master:
@@ -46,8 +47,11 @@ cda: functions
 flybys: cda
 	@cat $(FLYBYS) >> $(BUILD)
 
-inmsreadings: clean flybys
+inmsreadings: flybys
 	@cat $(INMSREADINGS) >> $(BUILD)
+
+istherelife: clean inmsreadings
+	@cat $(ISTHERELIFE) >> $(BUILD)
 
 clean:
 	@rm -rf $(BUILD)
