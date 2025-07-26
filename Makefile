@@ -4,6 +4,7 @@ SCRIPTS=${CURDIR}/scripts
 CSV_MP=${CURDIR}/data/master_plan.csv
 CSV_INMS=${CURDIR}/data/INMS/inms.csv
 CSV_CDA=${CURDIR}/data/CDA/cda.csv
+CSV_JPL=${CURDIR}/data/jpl_flybys.csv
 MASTER=$(SCRIPTS)/import.sql
 FLYBYS=$(SCRIPTS)/flybys.sql
 CDA=$(SCRIPTS)/cda.sql
@@ -41,6 +42,7 @@ cda: functions
 # order after functions are created, since this uses a function
 flybys: clean cda
 	@cat $(FLYBYS) >> $(BUILD)
+	@echo "COPY flybys FROM '$(CSV_JPL)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 
 clean:
 	@rm -rf $(BUILD)
