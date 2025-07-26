@@ -112,3 +112,13 @@ CREATE TABLE import.cda (
     particle_mass TEXT,
     particle_charge TEXT
 );
+
+DROP TABLE IF EXISTS flybys CASCADE;
+
+CREATE TABLE flybys (
+    id INT PRIMARY KEY,
+    name TEXT NOT NULL,
+    date DATE NOT NULL,
+    altitude NUMERIC(7,1),
+    speed NUMERIC(7,1)
+);

@@ -26,6 +26,7 @@ import: master
 	@echo "-- delete empty rows (null) and header rows (field name is same as value)" >> $(BUILD)
 	@echo "DELETE FROM import.inms WHERE sclk IS NULL OR sclk = 'sclk'; " >> $(BUILD)
 	@echo "COPY import.cda FROM '$(CSV_CDA)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
+	@echo "COPY flybys FROM '$(CSV_JPL)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 
 normalize: import
 	@cat $(NORMALIZE) >> $(BUILD)
@@ -42,7 +43,6 @@ cda: functions
 # order after functions are created, since this uses a function
 flybys: clean cda
 	@cat $(FLYBYS) >> $(BUILD)
-	@echo "COPY flybys FROM '$(CSV_JPL)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 
 clean:
 	@rm -rf $(BUILD)

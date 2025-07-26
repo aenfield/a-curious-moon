@@ -1,63 +1,68 @@
-DROP TABLE IF EXISTS flybys;
+-- flybys table is created in import.sql and loaded in the import make target
+-- this is all the follow-on stuff
 
-CREATE TABLE flybys (
-    id INT PRIMARY KEY,
-    name TEXT NOT NULL,
-    date DATE NOT NULL,
-    altitude NUMERIC(7,1),
-    speed NUMERIC(7,1)
-);
+-- 'sort of temp table'
+DROP TABLE IF EXISTS time_altitudes;
+SELECT
+    sclk::timestamp AS time_stamp,
+    alt_t::numeric(9,2) AS altitude,
+    DATE_PART('year', sclk::timestamp) AS year,
+    DATE_PART('week', sclk::timestamp) AS week
+INTO time_altitudes
+FROM import.inms    
+WHERE target = 'ENCELADUS'
+    AND alt_t IS NOT NULL;
 
+WITH mins AS (
+    SELECT
+        MIN(altitude) AS nadir,
+        year,
+        week
+    FROM time_altitudes
+    GROUP BY year, week
+    ORDER BY year, week
+), min_times AS (
+    SELECT
+        mins.*,
+        min(time_stamp) AS low_time,
+        min(time_stamp) - interval '20 seconds' AS window_start,
+        min(time_stamp) + interval '20 seconds' AS window_end
+    FROM mins
+    INNER JOIN time_altitudes ta 
+        ON mins.year = ta.year
+        AND mins.week = ta.week
+        AND mins.nadir = ta.altitude
+    GROUP BY mins.week, mins.year, mins.nadir
+), fixed_flybys AS (
+    SELECT
+        f.id,
+        f.date,
+        f.altitude,
+        f.speed,
+        mt.nadir,
+        mt.year,
+        mt.week,
+        mt.low_time,
+        mt.window_start,
+        mt.window_end
+    FROM flybys f
+    INNER JOIN min_times mt 
+        ON DATE_PART('year', f.date) = mt.year 
+        AND DATE_PART('week', f.date) = mt.week
+)
+SELECT
+    *
+INTO flybys_2
+FROM fixed_flybys
+ORDER BY date;
 
--- everything below from the first attempt using INMS data 
--- DROP TABLE IF EXISTS flybys;
+ALTER TABLE flybys_2 ADD PRIMARY KEY (id);
 
--- -- load table with CTE that uses low_time function
--- -- note that the version that calcs all the nadirs in one go instead of running a func/separate query for each is faster, but this is clearer
--- WITH lows_by_week AS (
---     SELECT 
---         year,
---         week,
---         MIN(altitude) AS altitude
---     FROM flyby_altitudes
---     GROUP BY year, week
--- ), nadirs AS (
---     SELECT
---         low_time(altitude, year, week) AS time_stamp,
---         lows_by_week.altitude
---     FROM lows_by_week
--- )
--- SELECT 
---     nadirs.*,
---     -- initial values are null
---     null::varchar AS name,
---     null::timestamptz AS start_time,
---     null::timestamptz AS end_time
--- -- SELECT .. INTO creates a new table populated by the SELECT (diff from INSERT INTO which doesn't create a table)
--- INTO flybys 
--- FROM nadirs;
+DROP TABLE flybys CASCADE;
+DROP TABLE time_altitudes;
 
--- -- add primary key (why not do it when creating the table? maybe because we're using INTO?)
--- ALTER TABLE flybys ADD COLUMN id SERIAL PRIMARY KEY;
+ALTER TABLE flybys_2 RENAME TO flybys;
 
--- -- using the key, create the name using the new ID
--- -- [] concats strings and also coerces to string
--- UPDATE flybys SET NAME='E-' || id-1;
+ALTER TABLE flybys ADD targeted BOOLEAN NOT NULL DEFAULT false;
 
--- -- add trig calcs
--- ALTER TABLE flybys
--- ADD speed_kms NUMERIC(10,3),
--- ADD target_altitude NUMERIC(10,3),
--- ADD transit_distance NUMERIC(10,3);
-
--- UPDATE flybys
--- SET target_altitude = (
---     (altitude + 252) / sind(73) - 252
--- );
-
--- UPDATE flybys
--- SET transit_distance = (
---     (target_altitude + 252) * sind(17) * 2
--- );
--- end comment for first flyby attempt w/ INMS data
-
+UPDATE flybys SET targeted=true WHERE id in (3,5,7,17,18,21);
