@@ -1,5 +1,6 @@
 -- flybys table is created in import.sql and loaded in the import make target
--- this is all the follow-on stuff
+-- this is all the follow-on stuff (i.e., if you need to re-run this, you need
+-- drop/recreate the table in import.sql and then load the flyby data from the JPL)
 
 -- 'sort of temp table'
 DROP TABLE IF EXISTS time_altitudes;
@@ -36,6 +37,7 @@ WITH mins AS (
 ), fixed_flybys AS (
     SELECT
         f.id,
+        f.name,
         f.date,
         f.altitude,
         f.speed,

@@ -114,7 +114,6 @@ CREATE TABLE import.cda (
 );
 
 DROP TABLE IF EXISTS flybys CASCADE;
-
 CREATE TABLE flybys (
     id INT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -122,3 +121,13 @@ CREATE TABLE flybys (
     altitude NUMERIC(7,1),
     speed NUMERIC(7,1)
 );
+
+DROP TABLE IF EXISTS chem_data CASCADE;
+CREATE TABLE chem_data (
+    name TEXT,
+    formula VARCHAR(10),
+    molecular_weight INTEGER,
+    peak INTEGER,
+    sensitivity NUMERIC
+);
+

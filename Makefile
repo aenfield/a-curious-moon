@@ -5,16 +5,18 @@ CSV_MP=${CURDIR}/data/master_plan.csv
 CSV_INMS=${CURDIR}/data/INMS/inms.csv
 CSV_CDA=${CURDIR}/data/CDA/cda.csv
 CSV_JPL=${CURDIR}/data/jpl_flybys.csv
+CSV_CHEM=${CURDIR}/data/INMS/chem_data.csv
 MASTER=$(SCRIPTS)/import.sql
 FLYBYS=$(SCRIPTS)/flybys.sql
 CDA=$(SCRIPTS)/cda.sql
 NORMALIZE=$(SCRIPTS)/normalize.sql
 FUNCTIONS=$(SCRIPTS)/functions.sql
 VIEWS=$(SCRIPTS)/views.sql
+INMSREADINGS=$(SCRIPTS)/inmsreadings.sql
 
 # built up using stuff in the book - the result feels spaghettified and isn't maintainable
 
-all: flybys
+all: inmsreadings
 	psql $(DB) -f ${BUILD}
 
 master:
@@ -27,6 +29,7 @@ import: master
 	@echo "DELETE FROM import.inms WHERE sclk IS NULL OR sclk = 'sclk'; " >> $(BUILD)
 	@echo "COPY import.cda FROM '$(CSV_CDA)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 	@echo "COPY flybys FROM '$(CSV_JPL)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
+	@echo "COPY chem_data FROM '$(CSV_CHEM)' WITH DELIMITER ',' HEADER CSV;" >> $(BUILD)
 
 normalize: import
 	@cat $(NORMALIZE) >> $(BUILD)
@@ -40,9 +43,11 @@ functions: views
 cda: functions
 	@cat $(CDA) >> $(BUILD)
 
-# order after functions are created, since this uses a function
-flybys: clean cda
+flybys: cda
 	@cat $(FLYBYS) >> $(BUILD)
+
+inmsreadings: clean flybys
+	@cat $(INMSREADINGS) >> $(BUILD)
 
 clean:
 	@rm -rf $(BUILD)
